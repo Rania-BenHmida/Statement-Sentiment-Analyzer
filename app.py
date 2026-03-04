@@ -13,7 +13,7 @@ st.title("😊 Statement Sentiment Analyzer")
 # -------------------------
 # Your Hugging Face Token
 # -------------------------
-HUGGINGFACE_TOKEN = "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"
+HUGGINGFACE_TOKEN = "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"
 
 # -------------------------
 # Load Llama 3.2 3B (the one that works!)
