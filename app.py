@@ -13,6 +13,7 @@ st.title("😊 Statement Sentiment Analyzer")
 # -------------------------
 # Your Hugging Face Token
 # -------------------------
+from huggingface_hub import InferenceClient 
 # Get token from secrets (NOT hardcoded!)
 def get_hf_token():
     try:
