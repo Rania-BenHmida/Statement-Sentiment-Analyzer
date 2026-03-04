@@ -1,7 +1,8 @@
 streamlit==1.28.0
-langchain-huggingface==0.0.3
-langchain-core==0.1.30
 huggingface-hub==0.20.3
 transformers==4.36.0
 torch==2.1.0
-requests==2.31.0
+requests==2.31.
+streamlit==1.28.0
+langchain-huggingface==0.1.0
+langchain-core==0.3.0
