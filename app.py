@@ -13,51 +13,43 @@ st.title("😊 Statement Sentiment Analyzer")
 # -------------------------
 # Your Hugging Face Token
 # -------------------------
-from huggingface_hub import InferenceClient 
 # Get token from secrets (NOT hardcoded!)
-# -------------------------
-# Get Hugging Face Token from Streamlit Secrets
-# -------------------------
 def get_hf_token():
     try:
         return st.secrets["HUGGINGFACE_TOKEN"]
-    except Exception as e:
-        st.error("""
-        🔑 **Hugging Face Token Required!**
-        
-        Please add your token in Streamlit Secrets:
-        1. Go to your app dashboard on Streamlit Cloud
-        2. Click Settings → Secrets
-        3. Add: `HUGGINGFACE_TOKEN = "hf_your_token_here"`
-        """)
+    except:
+        st.error("Token not found in secrets! Please add HUGGINGFACE_TOKEN to Streamlit Secrets.")
         st.stop()
+
 # -------------------------
-# Initialize the client (NOT HuggingFaceEndpoint!)
+# Load Llama 3.2 3B (the one that works!)
 # -------------------------
 @st.cache_resource
-def get_client():
+def load_llama():
     try:
-        token = get_hf_token()
-        # This is the key fix - using InferenceClient directly
-        client = InferenceClient(
-            model="meta-llama/Llama-3.2-3B-Instruct",
-            token=token
+        token = get_hf_token()  # Get token from secrets
+        llm = HuggingFaceEndpoint(
+            repo_id="meta-llama/Llama-3.2-3B-Instruct",
+            huggingfacehub_api_token=token,  # Use the token variable, not HUGGINGFACE_TOKEN
+            task="text-generation",
+            max_new_tokens=512,
+            temperature=0.1,
+            do_sample=False,
         )
-        return client
+        return ChatHuggingFace(llm=llm)
     except Exception as e:
-        st.error(f"Failed to initialize client: {str(e)}")
+        st.error(f"Failed to load Llama: {str(e)}")
         return None
 
-# Initialize client
-with st.spinner("Connecting to Llama 3.2..."):
-    client = get_client()
+# Load the model
+with st.spinner("Loading Llama 3.2..."):
+    llm = load_llama()
 
-if not client:
-    st.error("Could not connect to Llama. Please check your token.")
-    st.stop()
+if llm:
+    st.sidebar.success("🦙 Llama 3.2 loaded successfully!")
 else:
-    st.sidebar.success("🦙 Connected to Llama 3.2!")
-
+    st.error("Could not load Llama. Please check your token.")
+    st.stop()
 
 # -------------------------
 # Prompt Templates (optimized for Llama)
@@ -127,13 +119,13 @@ user_input = st.text_area(
     height=150
 )
 
-col1, col2, col3 = st.columns([1, 1, 1])  # Middle column is twice as wide as sides
+col1, col2, col3 = st.columns([1, 1, 1])
 
-with col2:  # Use the middle column
+with col2:
     analyze_button = st.button(
         "🔍 Analyze Statement", 
         type="primary",
-        use_container_width=False  # This makes the button fill the column width
+        use_container_width=False
     )
 
 if analyze_button:
@@ -172,7 +164,6 @@ with st.sidebar:
     - Topic extraction
     - Question generation
     """)
-    
     
     st.header("📝 Example Texts")
     st.write("Try these:")
