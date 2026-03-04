@@ -13,7 +13,16 @@ st.title("😊 Statement Sentiment Analyzer")
 # -------------------------
 # Your Hugging Face Token
 # -------------------------
-HUGGINGFACE_TOKEN = "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"
+# Get token from secrets (NOT hardcoded!)
+def get_hf_token():
+    try:
+        return st.secrets["HUGGINGFACE_TOKEN"]
+    except:
+        st.error("Token not found in secrets! Please add HUGGINGFACE_TOKEN to Streamlit Secrets.")
+        st.stop()
+
+# Initialize client with token from secrets
+client = InferenceClient(token=get_hf_token())
 
 # -------------------------
 # Load Llama 3.2 3B (the one that works!)
