@@ -15,44 +15,49 @@ st.title("😊 Statement Sentiment Analyzer")
 # -------------------------
 from huggingface_hub import InferenceClient 
 # Get token from secrets (NOT hardcoded!)
+# -------------------------
+# Get Hugging Face Token from Streamlit Secrets
+# -------------------------
 def get_hf_token():
     try:
         return st.secrets["HUGGINGFACE_TOKEN"]
-    except:
-        st.error("Token not found in secrets! Please add HUGGINGFACE_TOKEN to Streamlit Secrets.")
+    except Exception as e:
+        st.error("""
+        🔑 **Hugging Face Token Required!**
+        
+        Please add your token in Streamlit Secrets:
+        1. Go to your app dashboard on Streamlit Cloud
+        2. Click Settings → Secrets
+        3. Add: `HUGGINGFACE_TOKEN = "hf_your_token_here"`
+        """)
         st.stop()
-
-# Initialize client with token from secrets
-HUGGINGFACE_TOKEN = InferenceClient(token=get_hf_token())
-
 # -------------------------
-# Load Llama 3.2 3B (the one that works!)
+# Initialize the client (NOT HuggingFaceEndpoint!)
 # -------------------------
 @st.cache_resource
-def load_llama():
+def get_client():
     try:
-        llm = HuggingFaceEndpoint(
-            repo_id="meta-llama/Llama-3.2-3B-Instruct",
-            huggingfacehub_api_token=HUGGINGFACE_TOKEN,
-            task="text-generation",
-            max_new_tokens=512,
-            temperature=0.1,
-            do_sample=False,
+        token = get_hf_token()
+        # This is the key fix - using InferenceClient directly
+        client = InferenceClient(
+            model="meta-llama/Llama-3.2-3B-Instruct",
+            token=token
         )
-        return ChatHuggingFace(llm=llm)
+        return client
     except Exception as e:
-        st.error(f"Failed to load Llama: {str(e)}")
+        st.error(f"Failed to initialize client: {str(e)}")
         return None
 
-# Load the model
-with st.spinner("Loading Llama 3.2..."):
-    llm = load_llama()
+# Initialize client
+with st.spinner("Connecting to Llama 3.2..."):
+    client = get_client()
 
-if llm:
-    st.sidebar.success("🦙 Llama 3.2 loaded successfully!")
-else:
-    st.error("Could not load Llama. Please check your token.")
+if not client:
+    st.error("Could not connect to Llama. Please check your token.")
     st.stop()
+else:
+    st.sidebar.success("🦙 Connected to Llama 3.2!")
+
 
 # -------------------------
 # Prompt Templates (optimized for Llama)
