@@ -23,7 +23,7 @@ def get_hf_token():
         st.stop()
 
 # Initialize client with token from secrets
-client = InferenceClient(token=get_hf_token())
+HUGGINGFACE_TOKEN = InferenceClient(token=get_hf_token())
 
 # -------------------------
 # Load Llama 3.2 3B (the one that works!)
